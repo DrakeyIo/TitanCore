@@ -9,11 +9,12 @@ from datetime import timedelta, datetime
 import yt_dlp
 import asyncio
 from collections import deque
-
+from keep_alive import keep_alive
 
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
+keep_alive()
 
 profanities = ["nigger"]
 
@@ -511,3 +512,4 @@ async def meme(interaction: discord.Interaction):
 
 
 bot.run(TOKEN)
+
