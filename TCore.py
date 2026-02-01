@@ -458,27 +458,33 @@ def _extract(query, ydl_opts):
 
 async def play_next_song(voice_client, guild_id, channel):
     if guild_id in Song_queues and Song_queues[guild_id]:
-          audio_url, song_title = Song_queues[guild_id].popleft()
-          Current_song[guild_id] = song_title
-          ffmpeg_opts = {
+        audio_url, song_title = Song_queues[guild_id].popleft()
+        Current_song[guild_id] = song_title
+
+        ffmpeg_opts = {
             "before_options": "-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5",
-            "options": "-vn -c:a libopus -b:a 320k",
-          }
-          source = discord.FFmpegOpusAudio(audio_url, **ffmpeg_opts, executable="bin\\ffmpeg\\ffmpeg.exe")
+            "options": "-vn",
+        }
 
-          def after_play(error):
-               if error:
-                    print(f"Error: {error}")
-               asyncio.run_coroutine_threadsafe(play_next_song(voice_client, guild_id, channel), bot.loop)
+        source = discord.FFmpegOpusAudio(audio_url, **ffmpeg_opts)
 
-          voice_client.play(source, after=after_play)
-          asyncio.create_task(channel.send(f"Now playing: **{song_title}**"))
+        def after_play(error):
+            if error:
+                print(f"Error: {error}")
+            asyncio.run_coroutine_threadsafe(
+                play_next_song(voice_client, guild_id, channel),
+                bot.loop
+            )
+
+        voice_client.play(source, after=after_play)
+        await channel.send(f"Now playing: **{song_title}**")
+
     else:
-            if guild_id in Current_song:
-                del Current_song[guild_id]
-            if voice_client.is_connected():
-                await voice_client.disconnect()
-            
+        if guild_id in Current_song:
+            del Current_song[guild_id]
+
+        if voice_client.is_connected():
+            await voice_client.disconnect()
 
 @bot.tree.command(name="now", description="Shows the currently playing song")
 async def now(interaction: discord.Interaction):
@@ -504,5 +510,6 @@ async def now(interaction: discord.Interaction):
 
 
 bot.run(TOKEN)
+
 
 
