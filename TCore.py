@@ -1,6 +1,5 @@
 import os
 import random
-from turtle import title
 import discord
 from discord.ext import commands
 from discord import app_commands
@@ -508,6 +507,7 @@ async def meme(interaction: discord.Interaction):
     
     random_meme = os.path.join(meme_folder, random.choice(meme_files))
     await interaction.response.send_message(file=discord.File(random_meme))
+
 
 
 bot.run(TOKEN)
