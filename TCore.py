@@ -1,11 +1,12 @@
 import os
+import random
 from turtle import title
 import discord
 from discord.ext import commands
 from discord import app_commands
 from dotenv import load_dotenv
 import sqlite3
-from datetime import timedelta
+from datetime import timedelta, datetime
 import yt_dlp
 import asyncio
 from collections import deque
@@ -81,6 +82,7 @@ bot = commands.Bot(command_prefix=".", intents=intents)
 
 
 gid = 1466069152338018328
+last_creator_greeting = {}  # Track last greeting time for creator
 
 @bot.event
 async def on_ready():
@@ -116,10 +118,55 @@ async def on_message(msg):
                 break
     await bot.process_commands(msg)
 
-#----------------------------------------------------------------------
+    if msg.author.id == 797379227204321381:
+        cid = 797379227204321381
+        time = datetime.now()
+        if cid not in last_creator_greeting:
+             last_creator_greeting[cid] = time
+             await msg.channel.send(f"{msg.author.mention} Hey Creator!, hows it going?")
+        elif time - last_creator_greeting[cid] >= timedelta(minutes=30):
+             last_creator_greeting[cid] = time
+             await msg.channel.send(f"{msg.author.mention} Hey Creator!, hows it going?")
 
+#----------------------------------------------------------------------
+@bot.tree.command(name="mute",description = "Mutes a user for given time duration")
+@app_commands.checks.has_permissions(moderate_members=True)
+@app_commands.describe(
+    member = "The user you want to mute",
+    duration = "The duration of the mute in minutes")
+
+async def mute(interaction: discord.Interaction,member: discord.Member,duration: int):
+    duration = timedelta(minutes=duration)
+    await member.timeout(duration,reason=f"Muted by {interaction.user.mention} for {duration}")
+    await interaction.response.send_message(f"{member.mention} has been muted for {duration}.")
+
+#-----------------------------------------------------------------------
+
+@bot.tree.command(name="unmute",description = "Unmutes a user")
+@app_commands.checks.has_permissions(moderate_members=True)
+@app_commands.describe(
+    member = "The user you want to unmute")
+
+async def unmute(interaction: discord.Interaction,member: discord.Member):
+    await member.timeout(None,reason=f"Unmuted by {interaction.user.mention}")
+    await interaction.response.send_message(f"{member.mention} has been unmuted.")
+
+#-----------------------------------------------------------------------
+
+@bot.tree.command(name="ping",description = "Pings the bot to check if it's online")
+async def ping(interaction: discord.Interaction):
+    await interaction.response.send_message("Pong!")
+
+
+#-----------------------------------------------------------------------
+
+@bot.tree.command(name="info",description = "Gives info about the bot")
+async def info(interaction: discord.Interaction):
+    await interaction.response.send_message("I am TCore, a multifunctional Discord bot created to assist with moderation and provide entertainment through music playback. Developed with Python and discord.py, I aim to enhance your server experience!"
+    "n\nCreated by: Subhojit_.nvm")
 
 @bot.tree.command(name="warn",description = "warns a user")
+@app_commands.checks.has_permissions(moderate_members=True)
 @app_commands.describe(
     member = "The user you want to warn",
     reason = "The reason for the warning")
@@ -140,6 +187,7 @@ async def warn(interaction: discord.Interaction,member: discord.Member,reason: s
 
 
 @bot.tree.command(name="clearwarn",description="clears all warnings from given user")
+@app_commands.checks.has_permissions(moderate_members=True)
 @app_commands.describe(
     member = "The user you want to clear warnings from")
 
@@ -163,25 +211,35 @@ async def clearwarn(interaction: discord.Interaction,member: discord.Member):
     member = "The users warnings you want to view")
 
 async def cases(interaction: discord.Interaction,member: discord.Member):
-        conn = sqlite3.connect(f"{BASE_DIR}\\user_warns.db")
-        cursor = conn.cursor()
-
-        cursor.execute("""
-                       SELECT WarnCnt FROM upg
-                       WHERE (uid = ?) AND (gid = ?);""",
-                    (member.id,interaction.guild.id))
+        if not interaction.user.guild_permissions.moderate_members:
+            await interaction.response.send_message("Unauthorized.")
+            return
         
-        result = cursor.fetchone()
-        conn.close()
-        if (result[0] == 1):
-            await interaction.response.send_message(f"{member.mention} has {result[0]} Warning.")
-        else:
-              await interaction.response.send_message(f"{member.mention} has {result[0]} Warnings.")
+        try:
+            conn = sqlite3.connect(f"{BASE_DIR}\\user_warns.db")
+            cursor = conn.cursor()
 
+            cursor.execute("""
+                           SELECT WarnCnt FROM upg
+                           WHERE (uid = ?) AND (gid = ?);""",
+                        (member.id,interaction.guild.id))
+            
+            result = cursor.fetchone()
+            conn.close()
+            
+            if result is None:
+                await interaction.response.send_message(f"{member.mention} has 0 Warnings.")
+            elif result[0] == 1:
+                await interaction.response.send_message(f"{member.mention} has {result[0]} Warning.")
+            else:
+                  await interaction.response.send_message(f"{member.mention} has {result[0]} Warnings.")
+        except Exception as e:
+            print(f"Error: {e} by {interaction.user.id}")
 #---------------------------------------------------------------
 
 
 @bot.tree.command(name = "kick", description = "Kicks a user from the server")
+@app_commands.checks.has_permissions(kick_members=True)
 @app_commands.describe(
      member = "the user you want to kick",
      reason = "the reason for kicking"
@@ -192,6 +250,7 @@ async def kick(interaction: discord.Interaction, member: discord.Member, reason:
 
 
 @bot.tree.command(name="ban",description="Bans a user from the server")
+@app_commands.checks.has_permissions(ban_members=True)
 @app_commands.describe(
      member = "the user you want to ban",
      reason = "the reason for banning"
@@ -203,6 +262,7 @@ async def ban(interaction: discord.Interaction, member: discord.Member, reason: 
 
 
 @bot.tree.command(name = "unban", description="Unbans a user from the server")
+@app_commands.checks.has_permissions(ban_members=True)
 @app_commands.describe(
      user = "the discord ID of the user to be unbanned"
 )
@@ -211,7 +271,7 @@ async def unban(interaction: discord.Interaction, user: str):
      idint = int(user)
 
      await interaction.guild.unban(discord.Object(id=idint))
-     await interaction.response.send_message(f"User {idint} successfully unbanned by Moderator {interaction.use.mention}.")
+     await interaction.response.send_message(f"User {idint} successfully unbanned by Moderator {interaction.user.mention}.")
      
 
 #--------------------------------------------------------------------------------------------------------------------------
@@ -226,7 +286,8 @@ async def greet(interaction: discord.Interaction):
 
 
 #-------------------------------------------------------------------------------------------------------------------------
-Song_queues = {}      
+Song_queues = {}
+Current_song = {}      
 GID = 1466069152338018328
 
 @bot.tree.command(name = "play", description="Play or add a song to the queue")
@@ -249,35 +310,66 @@ async def play(interaction: discord.Interaction, song_query: str):
     elif voice_client != voice_client.channel:
          await voice_client.move_to(vc)
 
+    # Check if it's a playlist link
+    is_playlist = "playlist" in song_query.lower() or "youtube.com/playlist" in song_query or "youtu.be" in song_query
+    
     yt_dlp = {
          "format": "bestaudio[abr<=320]/bestaudio",
-         "noplaylist": True,
+         "noplaylist": not is_playlist,
          "youtube_include_dash_manifest": False,
          "youtube_include_hls_manifest": False,
     }
 
-    query = "ytsearch1: " + song_query
+    # If it's a direct link, use it as is; otherwise search for it
+    if song_query.startswith(("http://", "https://")):
+        query = song_query
+    else:
+        query = "ytsearch1: " + song_query
+    
     results = await search_ytdlp_async(query, ydl_opts=yt_dlp)
-    tracks = results.get("entries", [results])
+    
+    # Handle both single track and playlist results
+    if "entries" in results:
+        tracks = results["entries"]
+    else:
+        tracks = [results]
 
     if len(tracks) == 0:
             await interaction.followup.send(f"{interaction.user.mention} No results found for {song_query}.")
             return
     
-    first_track = tracks[0]
-    audio_url = first_track["url"]
-    title = first_track.get("title", "Untitled")
-
     guild_id = str(interaction.guild.id)
     if Song_queues.get(guild_id) is None:
          Song_queues[guild_id] = deque()
 
-    Song_queues[guild_id].append((audio_url, title))
+    # Add all tracks to queue
+    added_count = 0
+    track_titles = []
+    for track in tracks:
+        try:
+            audio_url = track["url"]
+            title = track.get("title", "Untitled")
+            Song_queues[guild_id].append((audio_url, title))
+            track_titles.append(title)
+            added_count += 1
+        except (KeyError, TypeError):
+            continue
+
+    if added_count == 0:
+            await interaction.followup.send(f"{interaction.user.mention} No valid tracks found.")
+            return
 
     if voice_client.is_playing() or voice_client.is_paused():
-         await interaction.followup.send(f"{interaction.user.mention} Added to queue: **{title}**")
+         if added_count == 1:
+            await interaction.followup.send(f"{interaction.user.mention} Added to queue: **{track_titles[0]}**")
+         else:
+            await interaction.followup.send(f"{interaction.user.mention} Added **{added_count}** songs to queue.")
     else:
-            await interaction.followup.send(f"Now playing: **{title}**")
+            title = track_titles[0]
+            if added_count == 1:
+                await interaction.followup.send(f"Now playing: **{title}**")
+            else:
+                await interaction.followup.send(f"Now playing: **{title}** + **{added_count - 1}** more songs from playlist")
             await play_next_song(voice_client, guild_id,interaction.channel)
 
 
@@ -320,6 +412,15 @@ async def resume(interaction: discord.Interaction):
 @bot.tree.command(name="queue",description="Shows the queue of songs")
 async def replay(interaction: discord.Interaction):
         voice_client = interaction.guild.voice_client
+        await interaction.response.defer()
+
+        guild_id = str(interaction.guild.id)
+        queue = Song_queues.get(guild_id, deque())
+        queue_list = [f"**{i+1}.** {title}" for i, (_, title) in enumerate(queue)]
+        if not queue_list:
+            await interaction.followup.send(f"The current queue is empty.")
+        else:
+            await interaction.followup.send(f"The current queue is:\n{'\n'.join(queue_list)}")
         
 
 
@@ -354,9 +455,11 @@ def _extract(query, ydl_opts):
          return ydl.extract_info(query, download=False)
      
 
+
 async def play_next_song(voice_client, guild_id, channel):
     if guild_id in Song_queues and Song_queues[guild_id]:
           audio_url, song_title = Song_queues[guild_id].popleft()
+          Current_song[guild_id] = song_title
           ffmpeg_opts = {
             "before_options": "-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5",
             "options": "-vn -c:a libopus -b:a 320k",
@@ -371,9 +474,40 @@ async def play_next_song(voice_client, guild_id, channel):
           voice_client.play(source, after=after_play)
           asyncio.create_task(channel.send(f"Now playing: **{song_title}**"))
     else:
+            if guild_id in Current_song:
+                del Current_song[guild_id]
             if voice_client.is_connected():
                 await voice_client.disconnect()
             
+
+@bot.tree.command(name="now", description="Shows the currently playing song")
+async def now(interaction: discord.Interaction):
+    voice_client = interaction.guild.voice_client
+    guild_id = str(interaction.guild.id)
     
+    if voice_client is None or not voice_client.is_connected():
+        await interaction.response.send_message(f"The bot is not in a voice channel.")
+        return
+    
+    if not (voice_client.is_playing() or voice_client.is_paused()):
+        await interaction.response.send_message(f"No song is currently playing.")
+        return
+    
+    if guild_id in Current_song:
+        current_title = Current_song[guild_id]
+        status = "⏸️ Paused" if voice_client.is_paused() else "▶️ Playing"
+        await interaction.response.send_message(f"{status}: **{current_title}**")
+    else:
+        await interaction.response.send_message(f"No song information available.")
+
+
+@bot.tree.command(name="meme", description= "Sends a random meme from meme folder")
+async def meme(interaction: discord.Interaction):
+    meme_folder = os.path.join(BASE_DIR, "memes")
+    meme_files = [f for f in os.listdir(meme_folder) if os.path.isfile(os.path.join(meme_folder, f))]
+    
+    random_meme = os.path.join(meme_folder, random.choice(meme_files))
+    await interaction.response.send_message(file=discord.File(random_meme))
+
 
 bot.run(TOKEN)
