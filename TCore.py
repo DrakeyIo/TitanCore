@@ -501,15 +501,8 @@ async def now(interaction: discord.Interaction):
         await interaction.response.send_message(f"No song information available.")
 
 
-@bot.tree.command(name="meme", description= "Sends a random meme from meme folder")
-async def meme(interaction: discord.Interaction):
-    meme_folder = os.path.join(BASE_DIR, "memes")
-    meme_files = [f for f in os.listdir(meme_folder) if os.path.isfile(os.path.join(meme_folder, f))]
-    
-    random_meme = os.path.join(meme_folder, random.choice(meme_files))
-    await interaction.response.send_message(file=discord.File(random_meme))
-
 
 
 bot.run(TOKEN)
+
 
