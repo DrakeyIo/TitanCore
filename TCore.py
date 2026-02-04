@@ -7,6 +7,9 @@ import asyncio
 import sqlite3
 from datetime import datetime, timedelta
 import random
+from keep_alive import keep_alive
+
+keep_alive()
 
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -553,3 +556,4 @@ async def now(interaction: discord.Interaction):
 
 
 bot.run(TOKEN)
+
