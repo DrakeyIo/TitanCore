@@ -160,6 +160,13 @@ async def on_message(msg):
         if "romeo" in msg.content.lower():
             for i in rom:
                 await msg.channel.send(i)
+
+@bot.hybrid_command(name="chod", description="chod")
+async def chod(ctx:commands.Context):
+    await ctx.send(f"https://media.discordapp.net/attachments/1435324014737358982/1469007738246791289/magical_wallet.mp4?ex=69861791&is=6984c611&hm=70d169366228c17fa20b8b35639ffa35c689cca0cd3914fdf81c7752e435df0f&")
+
+
+
 @bot.hybrid_command(name="unsee", description="Pretend you didn't see the last message")
 async def unsee(ctx:commands.Context):
     await ctx.send(f"{ctx.author.mention} pretended they didn't see that absolute crap of a message.")
