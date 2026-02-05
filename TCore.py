@@ -145,13 +145,13 @@ async def on_message(msg):
         print(f"{msg.author} is no longer AFK.")
     await bot.process_commands(msg)
 
-    # if msg.author.id != bot.user.id:
-    #     if (msg.content.startswith("<@") and msg.content.endswith(">")):
-    #         # Extract user ID from mention
-    #         user_id = int(msg.content[2:-1])
-    #         if user_id in afk_users:
-    #             reason = afk_users[user_id]
-    #             await msg.channel.send(f"{msg.content} is currently AFK. Reason: {reason}")
+    if msg.author.id != bot.user.id:
+        if (msg.content.startswith("<@") and msg.content.endswith(">")):
+            # Extract user ID from mention
+            user_id = int(msg.content[2:-1])
+            if user_id in afk_users:
+                reason = afk_users[user_id]
+                await msg.channel.send(f"{msg.content} is currently AFK. Reason: {reason}")
     if msg.author.id != bot.user.id:
         if msg.content.startswith("psps"):
             await msg.channel.send("Paws Paws! 🥺😼")
@@ -561,6 +561,7 @@ async def now(interaction: discord.Interaction):
 
 
 bot.run(TOKEN)
+
 
 
 
