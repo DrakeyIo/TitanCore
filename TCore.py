@@ -163,7 +163,9 @@ async def on_message(msg):
 @bot.hybrid_command(name="unsee", description="Pretend you didn't see the last message")
 async def unsee(ctx:commands.Context):
     await ctx.send(f"{ctx.author.mention} pretended they didn't see that absolute crap of a message.")
-    
+@bot.hybrid_command(name="unfriend", description="Unfriend")
+async def unfriend(ctx:commands.Context):
+    await ctx.send(f"https://cdn.discordapp.com/attachments/1435324014737358982/1468941622938173472/1650700117674_.mp4?ex=6985d9fe&is=6984887e&hm=06d29b91a9153de196e31eba4c870878370a80aae5fd73ae917f95b74bda1dde&")
 @bot.hybrid_command(name="afk", description="Sets your status to AFK")
 @app_commands.describe(reason="The reason for going AFK")
 async def afk(ctx: commands.Context, reason: str = "No reason provided"):
@@ -559,5 +561,6 @@ async def now(interaction: discord.Interaction):
 
 
 bot.run(TOKEN)
+
 
 
