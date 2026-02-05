@@ -160,7 +160,10 @@ async def on_message(msg):
         if "romeo" in msg.content.lower():
             for i in rom:
                 await msg.channel.send(i)
-
+@bot.hybrid_command(name="unsee", description="Pretend you didn't see the last message")
+async def unsee(ctx:commands.Context):
+    await ctx.send(f"{ctx.author.mention} pretended they didn't see that absolute crap of a message.")
+    
 @bot.hybrid_command(name="afk", description="Sets your status to AFK")
 @app_commands.describe(reason="The reason for going AFK")
 async def afk(ctx: commands.Context, reason: str = "No reason provided"):
@@ -556,4 +559,5 @@ async def now(interaction: discord.Interaction):
 
 
 bot.run(TOKEN)
+
 
