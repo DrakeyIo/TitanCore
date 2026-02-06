@@ -1,13 +1,18 @@
+from asyncio import tasks
 import os
+from signal import signal
 import discord
 from discord.ext import commands
 from discord import app_commands
 from dotenv import load_dotenv
+import yt_dlp # NEW
+from collections import deque # NEW
 import asyncio
 import sqlite3
 from datetime import datetime, timedelta
 import random
-from keep_alive import keep_alive
+import time
+import pytz
 
 keep_alive()
 
@@ -84,6 +89,15 @@ gid = 1466069152338018328
 last_creator_greeting = {}  # Track last greeting time for creator
   # Track AFK users with their reasons
 
+
+@tasks.loop(time=time(7, 0, 0, tzinfo=pytz.timezone('Asia/Kolkata')))
+async def morning_wish():
+    channel = await bot.fetch_channel(1357797238243328174)
+    await channel.send("**<@1358003603343933490> Good morning fellas! freshen up and make the day count! ☀️**")
+
+
+
+
 @bot.event
 async def on_ready():
     try:
@@ -100,6 +114,16 @@ async def on_ready():
         await chan.send("**TCore is now online!, Music Features are currently disabled for maintenance.**")
     else:
         print("Channel not found.")
+    if not morning_wish.is_running():
+        morning_wish.start()
+
+
+
+
+
+
+
+
 
 rom = ["Sunday dilam Shilake","Monday dilam Mona ke","Tuesday dilam Tina ke","Wednesday Oindrila ke","Thurday dilam Riya ke","Friday dilam Diya ke","Saturday ta Priya ke","Dil to deyni karoke"]
 
@@ -568,6 +592,7 @@ async def now(interaction: discord.Interaction):
 
 
 bot.run(TOKEN)
+
 
 
 
