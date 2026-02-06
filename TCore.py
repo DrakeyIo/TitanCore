@@ -13,6 +13,7 @@ from datetime import datetime, timedelta
 import random
 import time
 import pytz
+from keep_alive import keep_alive
 
 keep_alive()
 
@@ -581,6 +582,7 @@ async def now(interaction: discord.Interaction):
 
 
 bot.run(TOKEN)
+
 
 
 
