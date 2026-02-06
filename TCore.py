@@ -1,4 +1,4 @@
-from asyncio import tasks
+from discord.ext import tasks
 import os
 from signal import signal
 import discord
@@ -582,6 +582,7 @@ async def now(interaction: discord.Interaction):
 
 
 bot.run(TOKEN)
+
 
 
 
