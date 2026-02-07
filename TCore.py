@@ -174,6 +174,22 @@ async def on_message(msg):
             for i in rom:
                 await msg.channel.send(i)
 
+
+@bot.hybrid_command(name="translate", description="translates a given message")
+
+async def afk(ctx: commands.Context):
+    if ctx.message.reference:  #checks for message reply or not
+        rep_msg = await ctx.channel.fetch_message(ctx.message.reference.message_id)
+        text = rep_msg.content
+        trans = googletrans.Translator()
+        res = await trans.translate(text)
+        await ctx.send(f"**__Translation- __**{res.text}")
+
+
+
+
+
+
 @bot.hybrid_command(name="chod", description="chod")
 async def chod(ctx:commands.Context):
     await ctx.send(f"https://media.discordapp.net/attachments/1435324014737358982/1469007738246791289/magical_wallet.mp4?ex=69861791&is=6984c611&hm=70d169366228c17fa20b8b35639ffa35c689cca0cd3914fdf81c7752e435df0f&")
@@ -191,6 +207,8 @@ async def on_message_delete(message):
         'attachments': message.attachments if message.attachments else None,
         'time': message.created_at
     }
+    print(snipe_message_cache)
+
 
 @bot.hybrid_command(name="snipe", description="Retrieve the last deleted message in the channel")
 async def snipe(ctx: commands.Context):
@@ -207,8 +225,6 @@ async def snipe(ctx: commands.Context):
     elif data['attachments']:
         attachment_urls = ', '.join(attachment.url for attachment in data['attachments'])
         await ctx.send(f"Last deleted message by {data['author'].mention} had attachments: {attachment_urls}")
-
-
 
 @bot.hybrid_command(name="unsee", description="Pretend you didn't see the last message")
 async def unsee(ctx:commands.Context):
@@ -611,6 +627,7 @@ async def now(interaction: discord.Interaction):
 
 
 bot.run(TOKEN)
+
 
 
 
