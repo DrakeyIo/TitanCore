@@ -401,7 +401,7 @@ async def cases(ctx: commands.Context,member: discord.Member):
 )
 async def kick(ctx: commands.Context, member: discord.Member, reason: str= "No reason provided"):
      await member.kick(reason = reason)
-     await ctx.send(f"{member.mention} has been kicked from the server by Moderator {ctx.user.mention} for reason: {reason}")
+     await ctx.send(f"{member.mention} has been kicked from the server by Moderator {ctx.author.mention} for reason: {reason}")
 
 @bot.hybrid_command(name="ban",description="Bans a user from the server")
 @app_commands.checks.has_permissions(ban_members=True)
@@ -627,6 +627,7 @@ async def now(interaction: discord.Interaction):
 
 
 bot.run(TOKEN)
+
 
 
 
