@@ -13,7 +13,7 @@ from datetime import datetime, timedelta, time
 import random
 import pytz
 from keep_alive import keep_alive
-
+import googletrans
 keep_alive()
 
 
@@ -627,6 +627,7 @@ async def now(interaction: discord.Interaction):
 
 
 bot.run(TOKEN)
+
 
 
 
