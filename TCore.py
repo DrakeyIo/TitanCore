@@ -178,6 +178,36 @@ async def on_message(msg):
 async def chod(ctx:commands.Context):
     await ctx.send(f"https://media.discordapp.net/attachments/1435324014737358982/1469007738246791289/magical_wallet.mp4?ex=69861791&is=6984c611&hm=70d169366228c17fa20b8b35639ffa35c689cca0cd3914fdf81c7752e435df0f&")
 
+snipe_message_cache = {}
+
+@bot.event
+async def on_message_delete(message):
+    if message.author.bot:
+        return
+    # Store the deleted message info by channel ID
+    snipe_message_cache[message.channel.id] = {
+        'author': message.author,
+        'content': message.content,
+        'attachments': message.attachments if message.attachments else None,
+        'time': message.created_at
+    }
+
+@bot.hybrid_command(name="snipe", description="Retrieve the last deleted message in the channel")
+async def snipe(ctx: commands.Context):
+    # Check if there's a cached deleted message for this channel
+    if ctx.channel.id not in snipe_message_cache:
+        await ctx.send("No deleted messages to snipe!")
+        return
+    
+    data = snipe_message_cache[ctx.channel.id]
+
+    # Check if the message had text content
+    if data['content']:
+        await ctx.send(f"Last deleted message by {data['author'].mention}: \"{data['content']}\"")
+    elif data['attachments']:
+        attachment_urls = ', '.join(attachment.url for attachment in data['attachments'])
+        await ctx.send(f"Last deleted message by {data['author'].mention} had attachments: {attachment_urls}")
+
 
 
 @bot.hybrid_command(name="unsee", description="Pretend you didn't see the last message")
@@ -366,7 +396,7 @@ async def kick(ctx: commands.Context, member: discord.Member, reason: str= "No r
 
 async def ban(ctx: commands.Context, member: discord.Member, reason: str = "No reason provided"):
      await member.ban(reason=reason)
-     await ctx.send(f"{member.mention} has been banned from the server by Moderator {ctx.user.mention} for reason: {reason}")
+     await ctx.send(f"{member.mention} has been banned from the server by Moderator {ctx.author.mention} for reason: {reason}")
 
 
 @bot.hybrid_command(name = "unban", description="Unbans a user from the server")
@@ -581,6 +611,7 @@ async def now(interaction: discord.Interaction):
 
 
 bot.run(TOKEN)
+
 
 
 
