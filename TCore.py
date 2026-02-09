@@ -112,7 +112,7 @@ async def on_ready():
 @tasks.loop(time=time(9, 0, 0, tzinfo=pytz.timezone("Asia/Kolkata")))
 async def morning_wish():
     channel = await bot.fetch_channel(1357797238243328174)  
-    await channel.send(f"**<@1358003603343933490> Good morning Fellas! freshen up and make the day count! ☀️**")
+    await channel.send(f"**<@&1358003603343933490> Good morning Fellas! freshen up and make the day count! ☀️**")
 
 rom = ["Sunday dilam Shilake","Monday dilam Mona ke","Tuesday dilam Tina ke","Wednesday Oindrila ke","Thurday dilam Riya ke","Friday dilam Diya ke","Saturday ta Priya ke","Dil to deyni karoke"]
 
