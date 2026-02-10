@@ -186,7 +186,9 @@ async def afk(ctx: commands.Context):
         await ctx.send(f"**__Translation- __**{res.text}")
 
 
-
+@bot.hybrid_command(name="rj", description="rj")
+async def rj(ctx:commands.Context):
+    await ctx.send(f"https://media.discordapp.net/attachments/1469754669906530406/1470677455202418740/VID-20250810-WA00182.mp4?ex=698c2a9d&is=698ad91d&hm=37863682e47aec2e1643e90e477a7bea8d37d8e09f7e699efa5dd6ceb5c13fef&")
 
 
 
