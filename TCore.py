@@ -114,7 +114,7 @@ async def on_ready():
             
             embed3 = discord.Embed(title="Status", description=f"🟢 **Online**", color=discord.Color.orange())
             await chan.send(embed=embed3)
-    with open(f"{BASE_DIR}\\changelogs.txt", "r", encoding="UTF-8") as fp:
+    with open(os.path.join(BASE_DIR, "changelogs.txt"), "r", encoding="UTF-8") as fp:
         x = fp.read()
     l = [1488627485170991244,1488630540318933002]
     for j in l:
