@@ -1,0 +1,8 @@
+TCore Bot — Changelog
+======================
+[v1.6.0]
+— Added Reminder command and better status update
+— .avatar command
+— .poll command
+— .graphs command
+— .shut (Bot owner only command)
