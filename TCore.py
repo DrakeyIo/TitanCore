@@ -14,6 +14,9 @@ import random
 import pytz
 # from keep_alive import keep_alive
 import googletrans
+import matplotlib.pyplot as plt
+import numpy as np
+import io
 
 
 
@@ -356,6 +359,31 @@ async def graphs(ctx: commands.Context):
     embed = discord.Embed(title="Trigonometric Graphs", description="Sin,Cosine,Tangent Graphs:", color=discord.Color.blue())
     embed.set_image(url="https://i.postimg.cc/HsjHZ1SH/graph.png")
     await ctx.send(embed=embed)
+#----------------------------------------------------------------------------------
+@bot.hybrid_command(name = "plot", description="Plots a math function")
+@app_commands.describe(
+    func = "Function of x to plot",
+    xmin = "minimum value of x",
+    xmax = "maximum value of x",
+)
+
+async def plot(ctx: commands.Context, func: str,xmin:float=-10.0,xmax: float=10.0):
+    await ctx.defer()
+    try:
+        x = np.linspace(xmin,xmax,500)
+        y = np.clip(eval(func,{"__builtins__":{}},{**vars(np),"x":x}),-1000,1000)
+        plt.figure()
+        plt.plot(x,y)
+        plt.title(f"f(x) = {func}")
+        plt.grid(True)
+
+        b = io.BytesIO()
+        plt.savefig(b,format="png")
+        b.seek(0)
+        plt.close()
+        await ctx.send(file=discord.File(b,"plot.png"))
+    except:
+        await ctx.send("invalid fn")
 
 #-----------------------------------------------------------------------
 @bot.hybrid_command(name="info",description = "Gives info about the bot")
