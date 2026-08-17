@@ -1,0 +1,17 @@
+# Secret API Tokens
+.env
+
+# Virtual Environments
+.venv/
+bot_env/
+tcoreenv/
+
+# Python Cache
+__pycache__/
+.cache/
+
+# Active Databases
+user_warns.db
+
+# VS Code settings
+.vscode/

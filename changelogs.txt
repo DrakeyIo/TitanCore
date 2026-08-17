@@ -1,0 +1,51 @@
+TCore Bot Command Changelog
+
+Available commands:
+- .changelog [channel_id]
+  Shows the latest changelogs. If a channel ID is provided, posts the changelog there.
+- .poll <question> <option1,option2,...>
+  Creates a poll with up to 5 options.
+- .translate
+  Translates the replied-to message.
+- .snipe
+  Retrieves the last deleted message in the current channel.
+- .afk [reason]
+  Marks you as AFK with an optional reason.
+- .mute <member> <duration>
+  Mutes a user for the specified duration in minutes.
+- .unmute <member>
+  Removes timeout/mute from a user.
+- .ping
+  Checks if the bot is online.
+- .purge <amount>
+  Deletes a number of messages from the current channel.
+- .graphs
+  Sends a trigonometric graph embed.
+- .plot <func> [xmin] [xmax]
+  Plots a math function and returns an image.
+- .info
+  Shows information about the bot.
+- .warn <member> [reason]
+  Warns a user and logs the warning.
+- .clearwarn <member>
+  Clears all warnings for a member.
+- .cases <member>
+  Shows warning history for a member.
+- .avatar [member]
+  Shows the avatar of a member or yourself.
+- .kick <member> [reason]
+  Kicks a user from the server.
+- .ban <member> [reason]
+  Bans a user from the server.
+- .unban <user_id>
+  Unbans a user by Discord ID.
+- .greet
+  Sends a friendly greeting.
+- .remind <time> <reminder>
+  Sends a DM reminder after the specified time in minutes.
+- .shut
+  Shuts down the bot (owner-only command).
+
+Notes:
+- Use the bot prefix `.` for all commands.
+- Some commands require moderation permissions or owner status.
