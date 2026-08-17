@@ -142,11 +142,6 @@ async def on_ready():
             await clogs.send(embed=embed5)
         
 
-# @tasks.loop(time=time(9, 0, 0, tzinfo=pytz.timezone("Asia/Kolkata")))
-# async def morning_wish():
-#     channel = await bot.fetch_channel(1357797238243328174)  
-#     await channel.send(f"**<@&1358003603343933490> Good morning Fellas! freshen up and make the day count! ☀️**")
-
 @bot.event
 async def on_message(msg):
     if msg.author.id != bot.user.id:
@@ -398,42 +393,38 @@ async def purge(ctx: commands.Context,amount: int):
         await ctx.send("I don't have permission to manage messages in this channel.")
 
 
-#-----------------------------------------------------------------------
-@bot.hybrid_command(name = "graphs", description="Shows trignometric graphs")
-async def graphs(ctx: commands.Context):
-    embed = discord.Embed(title="Trigonometric Graphs", description="Sin,Cosine,Tangent Graphs:", color=discord.Color.blue())
-    embed.set_image(url="https://i.postimg.cc/HsjHZ1SH/graph.png")
-    await ctx.send(embed=embed)
 #----------------------------------------------------------------------------------
-@bot.hybrid_command(name = "plot", description="Plots a math function")
-@app_commands.describe(
-    func = "Function of x to plot",
-    xmin = "minimum value of x",
-    xmax = "maximum value of x",
-)
+#DIsabled the plot commands due to Async issues.
 
-async def plot(ctx: commands.Context, func: str,xmin:float=-10.0,xmax: float=10.0):
-    await ctx.defer()
-    try:
-        x = np.linspace(xmin,xmax,500)
-        y = np.clip(eval(func,{"__builtins__":{}},{**vars(np),"x":x}),-1000,1000)
-        plt.figure()
-        plt.plot(x,y)
-        plt.title(f"f(x) = {func}")
-        plt.grid(True)
+# @bot.hybrid_command(name = "plot", description="Plots a math function")
+# @app_commands.describe(
+#     func = "Function of x to plot",
+#     xmin = "minimum value of x",
+#     xmax = "maximum value of x",
+# )
 
-        b = io.BytesIO()
-        plt.savefig(b,format="png")
-        b.seek(0)
-        plt.close()
-        await ctx.send(file=discord.File(b,"plot.png"))
-    except Exception:
-        await ctx.send("Invalid function or error in plotting.")
+# async def plot(ctx: commands.Context, func: str,xmin:float=-10.0,xmax: float=10.0):
+#     await ctx.defer()
+#     try:
+#         x = np.linspace(xmin,xmax,500)
+#         y = np.clip(eval(func,{"__builtins__":{}},{**vars(np),"x":x}),-1000,1000)
+#         plt.figure()
+#         plt.plot(x,y)
+#         plt.title(f"f(x) = {func}")
+#         plt.grid(True)
+
+#         b = io.BytesIO()
+#         plt.savefig(b,format="png")
+#         b.seek(0)
+#         plt.close()
+#         await ctx.send(file=discord.File(b,"plot.png"))
+#     except Exception:
+#         await ctx.send("Invalid function or error in plotting.")
 
 #-----------------------------------------------------------------------
 @bot.hybrid_command(name="info",description = "Gives info about the bot")
 async def info(ctx: commands.Context):
-    await ctx.send("I am TCore, a multifunctional Discord bot created to assist with moderation and provide entertainment through music playback. Developed with Python and discord.py, I aim to enhance your server experience!\n\nCreated by: Subhojit_.nvm")
+    await ctx.send("TCore, a multifunctional Discord bot created to assist with moderation. Developed with discord.py, I aim to enhance your server experience!\n\nCreated by: Subhojit_.nvm")
 #-----------------------------------------------------------------------
 @bot.hybrid_command(name="warn",description = "warns a user")
 @app_commands.checks.has_permissions(moderate_members=True)
@@ -442,6 +433,7 @@ async def info(ctx: commands.Context):
     reason = "The reason for the warning")
 
 async def warn(ctx: commands.Context,member: discord.Member,reason: str = "No reason provided"):
+    ctx.defer()
     if not ctx.guild:
         await ctx.send("This command can only be used in a server.")
         return
@@ -594,92 +586,6 @@ async def shutdown(ctx):
     embed4 = discord.Embed(title="Status", description=f"🔴 **Shutting Down**", color=discord.Color.orange())
     await ctx.send(embed = embed4)
     await bot.close()
-
-vc_dict = {}
-
-@bot.hybrid_command(name="play", description="Play a song")
-@app_commands.describe(query="Song name or Spotify link")
-async def play(ctx: commands.Context, *, query: str):
-    if not ctx.author.voice:
-        await ctx.send("Join a voice channel!")
-        return
-
-    if sp is None:
-        await ctx.send("Spotify playback is not configured. Add your Spotify API credentials to the .env file first.")
-        return
-    
-    try:
-        if "spotify.com" in query:
-            track = sp.track(query.split("/")[-1].split("?")[0])
-        else:
-            results = sp.search(q=query, type='track', limit=1)
-            items = results.get("tracks", {}).get("items", [])
-            if not items:
-                await ctx.send("No matching track found.")
-                return
-            track = items[0]
-        
-        preview = track.get("preview_url")
-        track_name = track.get("name", "Unknown track")
-        artist_name = track.get("artists", [{}])[0].get("name", "Unknown artist")
-
-        if not preview:
-            await ctx.send("No preview available on Spotify. Trying a YouTube audio fallback...")
-            ydl_opts = {
-                "format": "bestaudio/best",
-                "noplaylist": True,
-                "quiet": True,
-                "skip_download": True,
-            }
-            with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-                info = ydl.extract_info(f"ytsearch1:{track_name} {artist_name}", download=False)
-                if isinstance(info, dict) and info.get("entries"):
-                    info = info["entries"][0]
-                audio_url = None
-                if isinstance(info, dict):
-                    for fmt in info.get("formats", []):
-                        if fmt.get("url"):
-                            audio_url = fmt["url"]
-                            break
-                    if not audio_url:
-                        audio_url = info.get("url")
-                if not audio_url:
-                    await ctx.send("No playable audio source found for that song.")
-                    return
-
-            vc = await ctx.author.voice.channel.connect()
-            vc_dict[ctx.guild.id] = vc
-            vc.play(discord.FFmpegPCMAudio(audio_url, before_options="-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5", options="-vn"))
-            await ctx.send(f"🎵 {track_name} - {artist_name} (fallback audio)")
-            return
-
-        vc = await ctx.author.voice.channel.connect()
-        vc_dict[ctx.guild.id] = vc
-        vc.play(discord.FFmpegPCMAudio(preview, before_options="-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5", options="-vn"))
-        
-        await ctx.send(f"🎵 {track_name} - {artist_name}")
-    except Exception as e:
-        await ctx.send(f"Error playing song: {e}")
-
-@bot.hybrid_command(name="stop", description="Stop music")
-async def stop(ctx: commands.Context):
-    if ctx.guild.id in vc_dict:
-        vc_dict[ctx.guild.id].stop()
-        await vc_dict[ctx.guild.id].disconnect()
-        del vc_dict[ctx.guild.id]
-        await ctx.send("⏹️ Stopped")
-
-@bot.hybrid_command(name="pause", description="Pause music")
-async def pause(ctx: commands.Context):
-    if ctx.guild.id in vc_dict and vc_dict[ctx.guild.id].is_playing():
-        vc_dict[ctx.guild.id].pause()
-        await ctx.send("⏸️ Paused")
-
-@bot.hybrid_command(name="resume", description="Resume music")
-async def resume(ctx: commands.Context):
-    if ctx.guild.id in vc_dict and vc_dict[ctx.guild.id].is_paused():
-        vc_dict[ctx.guild.id].resume()
-        await ctx.send("▶️ Resumed")
 
 if __name__ == "__main__":
     if not TOKEN:
