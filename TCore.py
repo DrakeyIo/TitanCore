@@ -38,9 +38,9 @@ if SPOTIFY_CLIENT_ID and SPOTIFY_CLIENT_SECRET:
 else:
     print("Spotify credentials not found. Set SPOTIFY_CLIENT_ID / SPOTIFY_CLIENT_SECRET or SPOTIPY_CLIENT_ID / SPOTIPY_CLIENT_SECRET in .env to enable music playback.")
 
-
+DB_PATH = os.path.join(BASE_DIR, "user_warns.db")
 def create_tbl():
-    conn = sqlite3.connect(f"{BASE_DIR}\\user_warns.db")
+    conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
 
     # Tracks the running warn count per user per guild
@@ -71,7 +71,7 @@ create_tbl()
 
 
 def inc_dec_warns(uid: int, gid: int, reason: str = "No reason provided", warned_by: int = None):
-    conn = sqlite3.connect(f"{BASE_DIR}\\user_warns.db")
+    conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
 
     # Upsert the count
@@ -550,11 +550,19 @@ async def unban(ctx: commands.Context, user: str):
     if not ctx.guild:
         await ctx.send("This command can only be used in a server.")
         return
-    idint = int(user)
+    try:
+        idint = int(user.strip())
+    except ValueError:
+        await ctx.send("Please provide a valid user ID. ")
+        return
 
-    await ctx.guild.unban(discord.Object(id=idint))
-    await ctx.send(f"User {idint} successfully unbanned by Moderator {ctx.author.mention}.")
-     
+    try:
+        await ctx.guild.unban(discord.Object(id=idint))
+        await ctx.send(f"User with ID `{idint}` successfully unbanned by Moderator {ctx.author.mention}.")
+    except discord.NotFound:
+        await ctx.send("That user is not currently banned or does not exist.")
+    except discord.HTTPException as e:
+        await ctx.send(f"Failed to unban user: {e}")
 
 #--------------------------------------------------------------------------------------------------------------------------
 
@@ -564,20 +572,26 @@ async def greet(ctx: commands.Context):
     await ctx.send(f"Hey there!, {username}")
 
 #-------------------------------------------------------------------------------------------------------------------------
-@bot.hybrid_command(name = "remind",description="Remind you in the given time interval in your DM")
+@bot.hybrid_command(name="remind", description="Remind you in the given time interval in your DM")
 @app_commands.describe(
-    time = "The time after which you want to be reminded (in minutes)",
-    reminder = "The reminder message you want to receive"
-
+    time="The time after which you want to be reminded (in minutes)",
+    reminder="The reminder message you want to receive"
 )
 async def remind(ctx: commands.Context, time: int, reminder: str):
+    if time <= 0:
+        await ctx.send("Please provide a valid time!", ephemeral=True)
+        return
+    
+    if time > 1440:  # Force the time maximum 24 hours
+        await ctx.send("There is a cap of 24 hours (1440 minutes). Please run the command again with a valid time.", ephemeral=True)
+        return 
+        
     await ctx.send(f"TCore will remind you in {time} minutes!")
     await asyncio.sleep(time * 60)
     try:
         await ctx.author.send(f"**Reminder** : {reminder}")
     except discord.Forbidden:
         await ctx.send(f"{ctx.author.mention}, I can't send you a DM. Please check your privacy settings.")
-
 #--------------------------------------------------------------------------------------------------------------------------
 @bot.hybrid_command(name = "shut" , description="Shuts down bot")
 @commands.is_owner()
