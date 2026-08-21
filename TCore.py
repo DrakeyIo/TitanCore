@@ -572,26 +572,26 @@ async def greet(ctx: commands.Context):
     await ctx.send(f"Hey there!, {username}")
 
 #-------------------------------------------------------------------------------------------------------------------------
-@bot.hybrid_command(name = "remind",description="Remind you in the given time interval in your DM")
+@bot.hybrid_command(name="remind", description="Remind you in the given time interval in your DM")
 @app_commands.describe(
-    time = "The time after which you want to be reminded (in minutes)",
-    reminder = "The reminder message you want to receive"
-
+    time="The time after which you want to be reminded (in minutes)",
+    reminder="The reminder message you want to receive"
 )
 async def remind(ctx: commands.Context, time: int, reminder: str):
     if time <= 0:
         await ctx.send("Please provide a valid time!", ephemeral=True)
         return
-    if time > 1440: # 24hr Limit
-        await ctx.send("TCore will remind you in 24 hours!", ephemeral=True)
-        return
+    
+    if time > 1440:  # Force the time maximum 24 hours
+        await ctx.send("There is a cap of 24 hours (1440 minutes). Please run the command again with a valid time.", ephemeral=True)
+        return 
+        
     await ctx.send(f"TCore will remind you in {time} minutes!")
     await asyncio.sleep(time * 60)
     try:
         await ctx.author.send(f"**Reminder** : {reminder}")
     except discord.Forbidden:
         await ctx.send(f"{ctx.author.mention}, I can't send you a DM. Please check your privacy settings.")
-
 #--------------------------------------------------------------------------------------------------------------------------
 @bot.hybrid_command(name = "shut" , description="Shuts down bot")
 @commands.is_owner()
