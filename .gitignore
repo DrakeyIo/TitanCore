@@ -11,7 +11,7 @@ __pycache__/
 .cache/
 
 # Active Databases
-user_warns.db
+.user_warns.db
 
 # VS Code settings
 .vscode/
