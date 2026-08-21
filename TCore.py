@@ -433,7 +433,7 @@ async def info(ctx: commands.Context):
     reason = "The reason for the warning")
 
 async def warn(ctx: commands.Context,member: discord.Member,reason: str = "No reason provided"):
-    ctx.defer()
+    await ctx.defer()
     if not ctx.guild:
         await ctx.send("This command can only be used in a server.")
         return
