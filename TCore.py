@@ -308,7 +308,7 @@ async def snipe(ctx: commands.Context):
 async def afk(ctx: commands.Context, reason: str = "No reason provided"):
     try:
         if len(ctx.author.display_name) > 26:
-                await ctx.send(f"Cannot change nickname for {ctx.author.mention} as it exceeds 32 characters, But marked AFK.")
+                await ctx.send(f"Cannot change nickname for {ctx.author.mention} as it exceeds 26 characters, But marked AFK.")
         else:
             await ctx.author.edit(nick=f"[AFK] {ctx.author.display_name}")
         afk_users[ctx.author.id] = reason
@@ -333,8 +333,8 @@ async def afk(ctx: commands.Context, reason: str = "No reason provided"):
 async def mute(ctx: commands.Context,member: discord.Member,duration: int):
     duration = timedelta(minutes=duration)
     try:
-        if member.display_name > 32:
-            await ctx.send(f"Cannot change nickname for {member.display_name} as it exceeds 32 characters.")
+        if len(member.display_name) > 26:
+            await ctx.send(f"Cannot change nickname for {member.display_name} as it exceeds 26 characters.")
         else:
             await member.edit(nick=f"[MUTED] {member.display_name}")
 
