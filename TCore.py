@@ -307,7 +307,10 @@ async def snipe(ctx: commands.Context):
 @app_commands.describe(reason="The reason for going AFK")
 async def afk(ctx: commands.Context, reason: str = "No reason provided"):
     try:
-        await ctx.author.edit(nick=f"[AFK] {ctx.author.display_name}")
+        if len(ctx.author.display_name) > 26:
+                await ctx.send(f"Cannot change nickname for {ctx.author.mention} as it exceeds 32 characters, But marked AFK.")
+        else:
+            await ctx.author.edit(nick=f"[AFK] {ctx.author.display_name}")
         afk_users[ctx.author.id] = reason
         await ctx.send(f"{ctx.author.mention} is now AFK. Reason: {reason}")
         print(f"{ctx.author} is now AFK. Reason: {reason}")
@@ -330,7 +333,11 @@ async def afk(ctx: commands.Context, reason: str = "No reason provided"):
 async def mute(ctx: commands.Context,member: discord.Member,duration: int):
     duration = timedelta(minutes=duration)
     try:
-        await member.edit(nick=f"[MUTED] {member.display_name}")
+        if member.display_name > 32:
+            await ctx.send(f"Cannot change nickname for {member.display_name} as it exceeds 32 characters.")
+        else:
+            await member.edit(nick=f"[MUTED] {member.display_name}")
+
     except discord.Forbidden:
         await ctx.send(f"**__Note: My role must be higher than {member.display_name}'s role to change their nickname.__**")
         print("Cannot change nickname for muted user.")
